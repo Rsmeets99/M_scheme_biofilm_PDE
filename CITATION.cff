@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use this code in your work/research, please cite it using the following metadata."
+authors:
+- family-names: "Smeets"
+  given-names: "Robin"
+- family-names: "Mitra"
+  given-names: "Koondanibha"
+- family-names: "Sonner"
+  given-names: "Stefanie"
+- family-names: "Pop"
+  given-names: "Sorin"
+title: "Robust and structure-preserving time-discretisation and linearisation schemes for singular and degenerate evolution systems arising in mathematical models for biofilm growth"
+date-released: 2024-03-20
+contact:
+  - affiliation: "Korteweg-de Vries Institute for Mathematics - University of Amsterdam"
+    email: "robinsmeets99@gmail.com"
+    family-names: Smeets
+    given-names: Robin
+repository-code: "https://github.com/Rsmeets99/M_scheme_biofilm_PDE"
+license: 
+  - MIT
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Smeets"
+    given-names: "Robin"
+  - family-names: "Mitra"
+    given-names: "Koondanibha"
+  - family-names: "Sonner"
+    given-names: "Stefanie"
+  - family-names: "Pop"
+    given-names: "Sorin"
+  title: "Robust and structure-preserving time-discretisation and linearisation schemes for singular and degenerate evolution systems arising in mathematical models for biofilm growth"
+  journal: "arXiv preprint arXiv:..."
+  year: 2024
