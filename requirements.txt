@@ -1,0 +1,2 @@
+fenics-dolfinx==0.7.3
+python==3.12.2
