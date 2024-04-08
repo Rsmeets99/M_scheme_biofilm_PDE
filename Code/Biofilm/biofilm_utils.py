@@ -1,4 +1,4 @@
-
+from dataclasses import dataclass
 from inspect import getsourcefile
 import os
 from os import path as op
@@ -18,6 +18,48 @@ import ufl # For defining functions and variational form
 
 file_name = op.abspath(getsourcefile(lambda:0))
 file_dir = op.dirname(file_name)
+
+## General data classes.
+
+@dataclass
+class geometry_param:
+    dim: int
+    h: float
+    x_min: float
+    x_max: float
+
+@dataclass
+class solution_param:
+    example_name: str
+
+    final_time: float
+    dt: float
+    gamma: float
+    M_par: float
+    mu: int
+
+    stop_crit: float
+    allowed_iter: int
+    full_iter: bool
+
+    r: float
+    height: float
+    xlist: list[float]
+    ylist: list[float]
+
+    un_max_estimate: float
+
+    kappa_1: float
+    kappa_2: float
+    kappa_3: float
+    kappa_4: float
+    delta_1: float
+    delta_2: float
+
+@dataclass
+class general_param:
+    save_plot: bool
+    save_results: bool
 
 # Functions for the weak form
 def f_func(v, kappa_2, kappa_3, kappa_4):
@@ -43,30 +85,21 @@ def Phi_prime_4_reg(u, un_max_estimate_4, L_estimate_4, delta_1):
 
 class geometry_class():
 
-    def __init__(self, geometry_param: dict) -> None:
+    def __init__(self, param: geometry_param) -> None:
         
-        self.dim : int
-        self.h : float
-        self.x_min : float
-        self.x_max : float
-
-        self.load(geometry_param)
+        self.param = param
 
         self.create_domain()
         self.create_spaces()
         self.create_boundary_condition()
 
-    def load(self, params: dict):
-        for name, value in params.items():
-            setattr(self, name, value)
-
     def create_domain(self) -> None:
         n = int((self.x_max - self.x_min)/self.h)
-        if self.dim == 1:
-            self.domain = mesh.create_interval(MPI.COMM_WORLD, n, points = (self.x_min, self.x_max))
+        if self.param.dim == 1:
+            self.domain = mesh.create_interval(MPI.COMM_WORLD, n, points = (self.param.x_min, self.param.x_max))
         
-        if self.dim == 2:
-            self.domain = mesh.create_rectangle(MPI.COMM_WORLD, [np.array([self.x_min, self.x_min]), np.array([self.x_max, self.x_max])], [n, n], mesh.CellType.triangle)
+        if self.param.dim == 2:
+            self.domain = mesh.create_rectangle(MPI.COMM_WORLD, [np.array([self.param.x_min, self.param.x_min]), np.array([self.param.x_max, self.param.x_max])], [n, n], mesh.CellType.triangle)
 
         self.x = ufl.SpatialCoordinate(self.domain)
 
@@ -80,11 +113,11 @@ class geometry_class():
         self.U = FunctionSpace(self.domain, ("DG", 1))
 
     def create_boundary_condition(self) -> None: 
-        if self.dim == 1:
-            dofs_V = fem.locate_dofs_geometrical(self.V, lambda x: np.isclose(x[0], self.x_max)) # Finds the locations close to where x = x_max (right border)
+        if self.param.dim == 1:
+            dofs_V = fem.locate_dofs_geometrical(self.V, lambda x: np.isclose(x[0], self.param.x_max)) # Finds the locations close to where x = x_max (right border)
             bcV = fem.dirichletbc(ScalarType(1), dofs_V, self.V) 
-        if self.dim == 2:
-            dofs_V = fem.locate_dofs_geometrical(self.V, lambda x: np.isclose(x[1], self.x_max)) # Finds the locations close to where y = x_max (top border)
+        if self.param.dim == 2:
+            dofs_V = fem.locate_dofs_geometrical(self.V, lambda x: np.isclose(x[1], self.param.x_max)) # Finds the locations close to where y = x_max (top border)
             bcV = fem.dirichletbc(ScalarType(1), dofs_V, self.V)
         
         self.bc = [bcV]
@@ -92,58 +125,28 @@ class geometry_class():
 
 class solution_class():
 
-    def __init__(self, geometry: geometry_class, solution_param: dict) -> None:
-        self.geometry = geometry
+    def __init__(self, geometry: geometry_class, param: solution_param) -> None:
         
-        self.example_name : str
+        self.geometry: geometry_class = geometry
+        self.param: solution_param = param
+        
         self.i: str = 0
+        self.j: str = 0
+        self.k: str = 0
 
-        self.final_time: float
-        self.dt : float
-        self.gamma: float
-        self.M_par: float
-        self.mu: int
-
-        self.stop_crit: float
-        self.allowed_iter : int
-        self.full_iter : bool
-
-        self.r : float
-        self.height : float
-        self.xlist : list
-        self.ylist : list
-
-        self.un_max_estimate: float
-        self.L_max_estimate: float = Phi_prime_4(self.un_max_estimate, self.delta_1)
-        self.Phi_max_estimate: float = Phi_4_np(self.un_max_estimate, self.delta_1)
-
-        self.kappa_1 : float
-        self.kappa_2 : float
-        self.kappa_3 : float
-        self.kappa_4 : float
-        self.delta_1 : float
-        self.delta_2 : float
+        self.L_max_estimate: float = Phi_prime_4(self.param.un_max_estimate, self.param.delta_1)
+        self.Phi_max_estimate: float = Phi_4_np(self.param.un_max_estimate, self.param.delta_1)
 
         self.Counter_list : list = []
         self.Error_L2 : list = []
         self.Error_grad : list = []
         self.Error_main : list = []
 
-        self.load(solution_param)
-
         self.create_functions()
         self.initialize_sol()
 
-        if self.mu == 1:
+        if self.param.mu == 1:
             self.set_solver_v_mu_1()
-
-    def load(self, params: dict):
-        for name, value in params.items():
-            setattr(self, name, value)
-
-    def set_upperbounds(self) -> None:
-        self.L_max_estimate = Phi_prime_4(self.un_max_estimate, self.delta_1)
-        self.Phi_max_estimate = Phi_4_np(self.un_max_estimate, self.delta_1)
 
     def create_functions(self) -> None:
         # Test and trial spaces for solving.
@@ -169,22 +172,22 @@ class solution_class():
         self.v_proj.name = "v_proj"
 
         # Constant function for PDE-PDE case in weak form of v_n
-        self.Diffusion_v = fem.Constant(self.geometry.domain, ScalarType(self.delta_2))
+        self.Diffusion_v = fem.Constant(self.geometry.domain, ScalarType(self.param.delta_2))
 
     def initial_u_iter(self, x, xlist, ylist): # Recursive function
-        if self.dim == 1:
+        if self.geometry.param.dim == 1:
             if len(xlist) == 1:
-                return np.full(x.shape[1], self.height*(1/self.r)*np.sqrt(np.maximum(0, self.r**2 - (x[0]-xlist[0])**2)))
-            return np.full(x.shape[1], self.height*(1/self.r)*np.sqrt(np.maximum(0, self.r**2 - (x[0]-xlist[0])**2))) + self.initial_u_iter(x, xlist[1:], ylist)
+                return np.full(x.shape[1], self.param.height*(1/self.param.r)*np.sqrt(np.maximum(0, self.param.r**2 - (x[0]-xlist[0])**2)))
+            return np.full(x.shape[1], self.param.height*(1/self.param.r)*np.sqrt(np.maximum(0, self.param.r**2 - (x[0]-xlist[0])**2))) + self.initial_u_iter(x, xlist[1:], ylist)
         
-        if self.dim == 2:
+        if self.geometry.param.dim == 2:
             if len(xlist)== 1:
-                return np.full(x.shape[1], self.height*(1/self.r)*np.sqrt(np.maximum(0, self.r**2 - (x[0]-xlist[0])**2 - (x[1]-ylist[0])**2)))
-            return np.full(x.shape[1], self.height*(1/self.r)*np.sqrt(np.maximum(0, self.r**2 - (x[0]-xlist[0])**2 - (x[1]-ylist[0])**2))) + self.initial_u_iter(x, xlist[1:], ylist[1:])
+                return np.full(x.shape[1], self.param.height*(1/self.param.r)*np.sqrt(np.maximum(0, self.param.r**2 - (x[0]-xlist[0])**2 - (x[1]-ylist[0])**2)))
+            return np.full(x.shape[1], self.param.height*(1/self.param.r)*np.sqrt(np.maximum(0, self.param.r**2 - (x[0]-xlist[0])**2 - (x[1]-ylist[0])**2))) + self.initial_u_iter(x, xlist[1:], ylist[1:])
 
     def initialize_u(self, x) -> None:
-        xlist = self.xlist
-        ylist = self.ylist
+        xlist = self.param.xlist
+        ylist = self.param.ylist
         return self.initial_u_iter(x, xlist, ylist)
     
     def initialize_sol(self) -> None:
@@ -193,18 +196,20 @@ class solution_class():
         self.v_n.x.array[:] = np.ones(len(self.v_n.x.array))
 
     def L_func(self, u):
-        return ufl.operators.max_value(Phi_prime_4_reg(u,self.un_max_estimate, self.L_max_estimate, self.delta_1) + self.M_par * self.dt**self.gamma, 2*self.M_par*self.dt**self.gamma)
+        return ufl.operators.max_value(Phi_prime_4_reg(u,self.param.un_max_estimate, self.L_max_estimate, self.param.delta_1) 
+                                       + self.param.M_par * self.param.dt**self.param.gamma, 
+                                       2*self.param.M_par*self.param.dt**self.param.gamma)
 
     def bilinear_functional_uw(self):
-        return ((1-f_func(self.v_n, self.kappa_2, self.kappa_3, self.kappa_4)*self.dt) * self.u_trial * self.w_test 
-                + self.dt * ufl.inner(ufl.grad(self.w_trial), ufl.grad(self.w_test)) 
+        return ((1-f_func(self.v_n, self.param.kappa_2, self.param.kappa_3, self.param.kappa_4)*self.param.dt) * self.u_trial * self.w_test 
+                + self.param.dt * ufl.inner(ufl.grad(self.w_trial), ufl.grad(self.w_test)) 
                 + self.L_func(self.u_n_i) * self.u_trial * self.u_test 
                 - self.w_trial * self.u_test) 
     
     def linear_functional_uw(self):
         return (self.u_n * self.w_test 
                 + self.L_func(self.u_n_i) * self.u_n_i * self.u_test 
-                - Phi_4_reg(self.u_n_i, self.un_max_estimate, self.L_max_estimate, self.Phi_max_estimate, self.delta_1) *self. u_test)
+                - Phi_4_reg(self.u_n_i, self.param.un_max_estimate, self.L_max_estimate, self.Phi_max_estimate, self.param.delta_1) * self. u_test)
 
     def update_uw(self) -> None:
 
@@ -215,11 +220,11 @@ class solution_class():
         Error_grad_temp = []
         Error_main_temp = []
         
-        if self.full_iter:
+        if self.param.full_iter:
             self.stop_crit = 0
         
         while Error > self.stop_crit:
-            if counter > self.allowed_iter:
+            if counter > self.param.allowed_iter:
                 print('did not converge')
                 print(f'H1 error is: {error_H1:.2E}') 
                 print(f'L2 error is: {error_L2:.2E}')
@@ -265,7 +270,7 @@ class solution_class():
             Error_L2_temp.append(error_L2)
             Error_grad_temp.append(error_L2grad)
             
-            error_H1 = np.sqrt(error_L2**2 + self.dt*error_L2grad**2)
+            error_H1 = np.sqrt(error_L2**2 + self.param.dt*error_L2grad**2)
             Error_main_temp.append(error_H1)
             
             Error = error_H1
@@ -285,10 +290,10 @@ class solution_class():
     def set_solver_v_mu_1(self) -> None:
 
         self.a_bilinear_v = (self.v_trial * self.v_test 
-                             + self.Diffusion_v * self.dt * ufl.inner(ufl.grad(self.v_trial), ufl.grad(self.v_test))) * ufl.dx
+                             + self.Diffusion_v * self.param.dt * ufl.inner(ufl.grad(self.v_trial), ufl.grad(self.v_test))) * ufl.dx
         self.bilinear_form_v = fem.form(self.a_bilinear_v)
         
-        self.L_linear_v = (self.v_n + self.dt*g_func(self.v_n, self.kappa_2, self.kappa_1) * self.u_n) * self.v_test * ufl.dx
+        self.L_linear_v = (self.v_n + self.param.dt*g_func(self.v_n, self.param.kappa_2, self.param.kappa_1) * self.u_n) * self.v_test * ufl.dx
         self.linear_form_v = fem.form(self.L_linear_v)
         self.b_v = fem.petsc.create_vector(self.linear_form_v)
         
@@ -302,9 +307,9 @@ class solution_class():
 
     def update_v(self) -> None:
 
-        if self.mu == 0: 
+        if self.param.mu == 0: 
 
-            expr_v = g_func(self.v_n,self.kappa_2, self.kappa_1)*self.dt*self.u_n + self.v_n
+            expr_v = g_func(self.v_n,self.param.kappa_2, self.param.kappa_1)*self.param.dt*self.u_n + self.v_n
             a_bilinear_proj = ufl.inner(self.v_trial, self.v_test) * ufl.dx
             L_linear_proj = ufl.inner(expr_v, self.v_test) * ufl.dx
             
@@ -327,7 +332,7 @@ class solution_class():
 
             self.v_n.x.array[:] = np.maximum(np.zeros(len(self.v_n.x.array)), self.v_n.x.array)
 
-        if self.mu == 1:
+        if self.param.mu == 1:
 
             with self.b_v.localForm() as loc_b_v:
                 loc_b_v.set(0)
@@ -346,11 +351,11 @@ class solution_class():
 
     def plot(self, n: int) -> None:
 
-        PATH = op.join(file_dir, 'Figures', self.example_name)
+        PATH = op.join(file_dir, 'Figures', self.param.example_name)
         if not op.exists(PATH):
             os.makedirs(PATH)
         
-        t = n * self.dt
+        t = n * self.param.dt
         file_name_plot_u = op.join(PATH, f'figure_u_{self.i}.xdmf')
         file_name_plot_v = op.join(PATH, f'figure_v_{self.i}.xdmf')
 
@@ -365,19 +370,17 @@ class solution_class():
 
         if n > 0:
             with io.XDMFFile(self.geometry.domain.comm, file_name_plot_u, 'a') as xdmf:
-                xdmf.write_mesh(self.geometry.domain)
                 xdmf.write_function(self.u_n, t)
 
             with io.XDMFFile(self.geometry.domain.comm, file_name_plot_v, 'a') as xdmf:
-                xdmf.write_mesh(self.geometry.domain)
                 xdmf.write_function(self.v_n, t)
 
     def save_results(self) -> None:
-        PATH = op.join(file_dir, 'Results', self.example_name)
+        PATH = op.join(file_dir, 'Results', self.param.example_name)
         if not op.exists(PATH):
             os.makedirs(PATH)
 
-        file_name_results = op.join(PATH, f'results_{self.i}.pickle')
+        file_name_results = op.join(PATH, f'results_{self.i}_{self.j}_{self.k}.pickle')
         with open(file_name_results, 'wb') as file:
             pickle.dump(self.Counter_list, file)
             pickle.dump(self.Error_L2, file)
@@ -385,29 +388,33 @@ class solution_class():
             pickle.dump(self.Error_main, file)
 
 
-def biofilm_M_scheme(solution: solution_class, parameters: dict[str, Any]) -> None:
+def biofilm_M_scheme(solution: solution_class, parameters: general_param) -> None:
 
     # Ininitialize u_n and v_n.
     solution.initialize_sol()
-    if parameters['save_plot']:
+    if parameters.save_plot:
         solution.plot(0)
 
     # Loop over time steps.
-    total_steps = int(solution.final_time/solution.dt)
+    total_steps = int(solution.param.final_time/solution.param.dt)
     for n in range(total_steps):
 
         # Solve for (u_n, w_n) using M-scheme.
         solution.update_uw()
 
+        if solution.Counter_list[-1] == -1:
+            print('Stopped example as did not converge')
+            break
+
         # Solve for v_n.
         solution.update_v()
 
-        if parameters['save_plot']:
+        if parameters.save_plot:
             solution.plot(n+1)
 
         print(f'Scheme is at {(n+1)/total_steps * 100}%. \r')
             
-    if parameters['save_results']:
+    if parameters.save_results:
         print('Saving results.')
         solution.save_results()
     

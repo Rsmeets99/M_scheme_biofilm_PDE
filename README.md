@@ -1,5 +1,15 @@
 This repository is a work in progress. Currently in the progress of completely refactoring the old code and making it compatible with the newest stable version of fenicsx. If one wants earlier acces to the code, please contact me for the old legacy code. 
 
+# TODO
+
+- [ ] Add plotting functions for `biofilm_avg_iter` and `biofilm_conv_rate`
+  - [ ] Include fitting of straight line in log-log scale for `biofilm_conv_rate`
+- [ ] Bug testing this new version of code
+- [ ] Repeat the work for the porous medium case
+  - [ ] Do not forget to add convergence to exact solution as dt to 0
+- [ ] Add comments and docstrings to code
+- [ ] Finish the `README.md` files
+
 # General explanation of this repository
 
 # How to install
