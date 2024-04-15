@@ -2,8 +2,8 @@ This repository is a work in progress. Currently in the progress of completely r
 
 # TODO
 
-- [ ] Add plotting functions for `biofilm_avg_iter` and `biofilm_conv_rate`
-  - [ ] Include fitting of straight line in log-log scale for `biofilm_conv_rate`
+- [x] Add plotting functions for `biofilm_avg_iter` and `biofilm_conv_rate`
+  - [x] Include fitting of straight line in log-log scale for `biofilm_conv_rate`
 - [ ] Bug testing this new version of code
 - [ ] Repeat the work for the porous medium case
   - [ ] Do not forget to add convergence to exact solution as dt to 0
