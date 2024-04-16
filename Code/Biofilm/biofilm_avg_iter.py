@@ -70,7 +70,7 @@ def combine_data(dt_list: list[float],
     results_dir = op.join(file_dir, 'Results')
     if not op.exists(results_dir):
         os.makedirs(results_dir)
-    example_dir = op.join(results_dir, 'Combined', name)
+    example_dir = op.join(file_dir, 'Processed', name)
     if not op.exists(example_dir):
         os.makedirs(example_dir)
 
@@ -110,7 +110,7 @@ def plot_data(dt_list: list[float],
 
     name = solution_config.example_name
 
-    results_dir = op.join(file_dir, 'Results', 'Combined')
+    results_dir = op.join(file_dir, 'Processed')
     example_dir = op.join(results_dir, name)
 
     for dt in dt_list:
@@ -152,26 +152,22 @@ if __name__ == '__main__':
                         help= 'If true, plots combined data, overwriting existing plots.')
     parsed_args, unknown = parser.parse_known_args()
 
-    dt_list = config.experiment_param_1D_avg_iter_biofilm.dt_list
-    h_list = config.experiment_param_1D_avg_iter_biofilm.h_list
-    M_list = config.experiment_param_1D_avg_iter_biofilm.M_list
+    # dt_list = config.experiment_param_1D_avg_iter_biofilm.dt_list
+    # h_list = config.experiment_param_1D_avg_iter_biofilm.h_list
+    # M_list = config.experiment_param_1D_avg_iter_biofilm.M_list
 
     # Smaller parameters for debugging
-    # dt_list = [10**(-1*(1+i/2)) for i in range(0,2)]
-    # h_list = [1/i for i in range(10,60,10)]
-    # M_list = [1e-7, 5e-4]
+    dt_list = [10**(-1*(1+i/2)) for i in range(0,2)]
+    h_list = [1/i for i in range(10,60,10)]
+    M_list = [1e-7, 5e-4]
+
+    geometry_config = config.geometry_param_1D_avg_iter_biofilm
+    solution_config = config.solution_param_1D_avg_iter_biofilm
+    general_config = config.general_param_1D_avg_iter_biofilm
 
     if parsed_args.generatedata:
-        generate_data(dt_list, M_list, h_list, 
-                    config.geometry_param_1D_avg_iter_biofilm, 
-                    config.solution_param_1D_avg_iter_biofilm, 
-                    config.general_param_1D_avg_iter_biofilm,
-                    parsed_args)
+        generate_data(dt_list, M_list, h_list, geometry_config, solution_config, general_config, parsed_args)
     if parsed_args.combinedata:
-        combine_data(dt_list, M_list, h_list, config.solution_param_1D_avg_iter_biofilm,)
+        combine_data(dt_list, M_list, h_list, solution_config)
     if parsed_args.plotdata:
-        plot_data(dt_list, config.solution_param_1D_avg_iter_biofilm)
-
-
-
-
+        plot_data(dt_list, solution_config)

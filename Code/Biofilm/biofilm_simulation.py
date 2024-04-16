@@ -5,6 +5,7 @@
 '''
 Python script for generating and saving simulations of the biofilm model.
 '''
+
 import argparse
 import biofilm_utils as utils
 import biofilm_config as config
@@ -26,20 +27,20 @@ if __name__ == '__main__':
                         help= 'If true, copies the .bp files to a specified folder (general_param.windows_dir) in Windows from WSL2')
     parsed_args, unknown = parser.parse_known_args()
 
-    # 1D PDE-ODE test simulation
-    geometry_config = config.geometry_param_1D_simulation_biofilm
-    solution_config = config.solution_param_1D_simulation_biofilm
-    general_config = config.general_param_1D_simulation_biofilm
-    generate_plot(geometry_config, solution_config, general_config, parsed_args)
+    # # 1D PDE-ODE test simulation
+    # geometry_config = config.geometry_param_1D_simulation_biofilm
+    # solution_config = config.solution_param_1D_simulation_biofilm
+    # general_config = config.general_param_1D_simulation_biofilm
+    # generate_plot(geometry_config, solution_config, general_config, parsed_args)
 
     # # 2D PDE-ODE simulation
     # geometry_config = config.geometry_param_2D_PDEODE_biofilm
     # solution_config = config.solution_param_2D_PDEODE_biofilm
     # general_config = config.general_param_2D_PDEODE_biofilm
-    # generate_plot(geometry_config, solution_config, general_config)
+    # generate_plot(geometry_config, solution_config, general_config, parsed_args)
 
     # # 2D PDE-PDE simulation
     # geometry_config = config.geometry_param_2D_PDEPDE_biofilm
     # solution_config = config.solution_param_2D_PDEPDE_biofilm
     # general_config = config.general_param_2D_PDEPDE_biofilm
-    # generate_plot(geometry_config, solution_config, general_config)
+    # generate_plot(geometry_config, solution_config, general_config, parsed_args)

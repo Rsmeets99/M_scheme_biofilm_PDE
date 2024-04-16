@@ -1,3 +1,13 @@
+# Author: Robin Smeets 
+# Email: robinsmeets99@gmail.com / r.k.h.smeets@uva.nl
+# Institute: Korteweg-de Vries Institute for Mathematics - University of Amsterdam
+
+'''
+Python script containing all the tools for running the examples, e.g. creating the mesh and the M-scheme.
+Code to solve the PDE:  partial_t u = Delta Phi(u) + f(v) * u
+                        partial_t v = mu * nabla cdot (D(u) * nabla v) + g(u,v)
+'''
+
 import argparse
 from dataclasses import dataclass
 from inspect import getsourcefile
@@ -5,7 +15,6 @@ import os
 from os import path as op
 import pickle
 import shutil
-from typing import Any
 
 from dolfinx import io                  # For exporting data as xdmf files
 from dolfinx import mesh                # For creating mesh
@@ -17,6 +26,7 @@ import numpy as np                      # Used in some functions
 from petsc4py import PETSc              # For solving the systems of equations
 from petsc4py.PETSc import ScalarType   # For defining a scalar type function
 import ufl                              # For defining functions and variational form
+import ufl.operators as operators       # For using the max_value operator in the definition of L^i_n
 
 file_name = op.abspath(getsourcefile(lambda:0))
 file_dir = op.dirname(file_name)
@@ -144,9 +154,9 @@ class solution_class():
         self.geometry: geometry_class = geometry
         self.param: solution_param = param
         
-        self.i: str = 0
-        self.j: str = 0
-        self.k: str = 0
+        self.i: int = 0
+        self.j: int = 0
+        self.k: int = 0
 
         self.L_max_estimate: float = Phi_prime_4(self.param.un_max_estimate, self.param.delta_1)
         self.Phi_max_estimate: float = Phi_4_np(self.param.un_max_estimate, self.param.delta_1)
@@ -156,7 +166,7 @@ class solution_class():
         self.Error_grad : list[float] = []
         self.Error_main : list[float] = []
 
-        self.total_steps : int = int(self.param.final_time/self.param.dt)
+        self.total_steps : int = round(self.param.final_time/self.param.dt)
 
         self.print_non_convergence : bool = False
 
@@ -173,7 +183,7 @@ class solution_class():
         self.w_test, self.u_test = ufl.TestFunctions(self.geometry.Z)
         self.Z_sol = fem.Function(self.geometry.Z)
 
-        # Defining the function spaces for all the functions
+        # Defining all the functions for solving the main problem.
         self.u_n = fem.Function(self.geometry.U)
         self.u_n.name = "u_n"
         self.u_n_i = fem.Function(self.geometry.U)
@@ -214,7 +224,7 @@ class solution_class():
         self.v_n.x.array[:] = np.ones(len(self.v_n.x.array))
 
     def L_func(self, u): # Defines L^i_n
-        return ufl.operators.max_value(Phi_prime_4_reg(u,self.param.un_max_estimate, self.L_max_estimate, self.param.delta_1) 
+        return operators.max_value(Phi_prime_4_reg(u,self.param.un_max_estimate, self.L_max_estimate, self.param.delta_1) 
                                        + self.param.M_par * self.param.dt**self.param.gamma, 
                                        2*self.param.M_par*self.param.dt**self.param.gamma)
 
@@ -413,11 +423,6 @@ class solution_class():
         file_name_v = op.join(local_dir, f'simulation_v.bp')
         target_file_name_u = op.join(target_dir, f'simulation_u.bp')
         target_file_name_v = op.join(target_dir, f'simulation_v.bp')
-
-        if op.exists(target_file_name_u):
-            shutil.rmtree(target_file_name_u)
-        if op.exists(target_file_name_v):
-            shutil.rmtree(target_file_name_v)
 
         shutil.copytree(file_name_u, target_file_name_u, dirs_exist_ok=True)
         shutil.copytree(file_name_v, target_file_name_v, dirs_exist_ok=True)

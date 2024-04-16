@@ -5,6 +5,7 @@
 '''
 Python script for computing the convergence rate against the time-step size.
 '''
+
 import argparse
 import datetime
 from inspect import getsourcefile
@@ -30,17 +31,13 @@ def generate_data(dt_list: list[float],
                   parsed_args: argparse.Namespace) -> None:
     '''Generate the data for plotting the convergence rate against time-step size.'''
 
-    geometry_config = config.geometry_param_1D_conv_alpha_biofilm
-    solution_config = config.solution_param_1D_conv_alpha_biofilm
-    general_config = config.general_param_conv_alpha_biofilm
-
     geometry = utils.geometry_class(geometry_config)
 
     time_start_readable_all = datetime.datetime.fromtimestamp(time.time())
     print(f'Start generating the data for example {solution_config.example_name}. Current time: {time_start_readable_all} \n')
 
     for i, dt in enumerate(dt_list):
-        print(f'\rGenerating data for dt = {dt}', end='')
+        print(f'\rGenerating data for dt = {dt:.2E}', end='')
         solution_config.dt = dt
         solution_config.final_time = dt
         solution = utils.solution_class(geometry, solution_config)
@@ -61,7 +58,7 @@ def combine_data(dt_list: list[float],
     results_dir = op.join(file_dir, 'Results')
     if not op.exists(results_dir):
         os.makedirs(results_dir)
-    example_dir = op.join(results_dir, 'Combined', name)
+    example_dir = op.join(file_dir, 'Processed', name)
     if not op.exists(example_dir):
         os.makedirs(example_dir)
 
@@ -103,7 +100,7 @@ def plot_data(geometry_config: utils.geometry_param,
     
     name = solution_config.example_name
 
-    results_dir = op.join(file_dir, 'Results', 'Combined')
+    results_dir = op.join(file_dir, 'Processed')
     example_dir = op.join(results_dir, name)
 
     path_name = op.join(example_dir, f'conv_rate_results.txt')
@@ -122,15 +119,12 @@ def plot_data(geometry_config: utils.geometry_param,
 
     line_fit, a = linear_log_fit(dt_data, conv_data)
 
-    plt.plot(dt_data, conv_data, 'r.', label = '$\\alpha$')
-    plt.plot(dt_data, line_fit, 'k--', label = f'slope = {a:.2f}')
-    
-    plt.yscale('log', base = 10)
-    plt.xscale('log', base = 10)
+    plt.plot(np.log10(dt_data), np.log10(conv_data), 'r.', label = '$\\alpha$')
+    plt.plot(np.log10(dt_data), np.log10(line_fit), 'k--', label = f'slope = {a:.2f}')
 
-    plt.xlabel('Time-step size $\\tau$')
-    plt.ylabel('Convergence rate $\\alpha$')
-    plt.title(f'Convergence rate, $h = {geometry_config.h:.1E}$, $\\gamma = {solution_config.gamma}$, {geometry_config.dim}D, $\\mu = {solution_config.mu}$')
+    plt.xlabel('Log10 time step size $\\tau$')
+    plt.ylabel('Log10 convergence rate $\\alpha$')
+    plt.title(f'Convergence rate, $h = {geometry_config.h:.2E}$, $\\gamma = {solution_config.gamma:.2f}$, {geometry_config.dim:.0f}D, $\\mu = {solution_config.mu:.0f}$')
     plt.grid()
     plt.legend()
     plt.savefig(path_name_fig)
@@ -151,12 +145,13 @@ if __name__ == '__main__':
 
     dt_list = config.experiment_param_1D_conv_alpha_biofilm.dt_list
 
+    geometry_config = config.geometry_param_1D_conv_alpha_biofilm
+    solution_config = config.solution_param_1D_conv_alpha_biofilm
+    general_config = config.general_param_1D_conv_alpha_biofilm
+
     if parsed_args.generatedata:
-        generate_data(dt_list, config.geometry_param_1D_conv_alpha_biofilm, 
-                    config.solution_param_1D_conv_alpha_biofilm, 
-                    config.general_param_1D_conv_alpha_biofilm,
-                    parsed_args)
+        generate_data(dt_list, geometry_config, solution_config, general_config, parsed_args)
     if parsed_args.combinedata:
-        combine_data(dt_list, config.solution_param_1D_conv_alpha_biofilm)
+        combine_data(dt_list, solution_config)
     if parsed_args.plotdata:
-        plot_data(config.geometry_param_1D_conv_alpha_biofilm, config.solution_param_1D_conv_alpha_biofilm)
+        plot_data(geometry_config, solution_config)

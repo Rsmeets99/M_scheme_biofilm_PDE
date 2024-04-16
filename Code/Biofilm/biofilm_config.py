@@ -1,3 +1,10 @@
+# Author: Robin Smeets 
+# Email: robinsmeets99@gmail.com / r.k.h.smeets@uva.nl
+# Institute: Korteweg-de Vries Institute for Mathematics - University of Amsterdam
+
+'''
+Python script containing the configurations of all the different examples.
+'''
 
 from biofilm_utils import geometry_param, solution_param, general_param, experiment_param
 
@@ -95,7 +102,7 @@ general_param_1D_conv_alpha_biofilm_dict = {
 }
 
 experiment_param_1D_conv_alpha_biofilm_dict = {
-    'dt_list' : [10**(-i/4) for i in range(4,13)],
+    'dt_list' : [10**(-i/4) for i in range(4,11)],
 }
 
 geometry_param_1D_conv_alpha_biofilm = geometry_param(**geometry_param_1D_conv_alpha_biofilm_dict)
@@ -106,7 +113,7 @@ experiment_param_1D_conv_alpha_biofilm = experiment_param(**experiment_param_1D_
 ## Configurations for 1D test simulation PDE-ODE
 geometry_param_1D_simulation_biofilm_dict = {
     'dim' : 1,
-    'h' : 0.005,
+    'h' : 1e-4,
     'x_min' : -2,
     'x_max' : 2
 }
@@ -153,22 +160,22 @@ general_param_1D_simulation_biofilm = general_param(**general_param_1D_simulatio
 geometry_param_2D_PDEPDE_biofilm_dict = {
     'dim' : 2,
     'h' : 0.02,
-    'x_min' : -2,
-    'x_max' : 2
+    'x_min' : -1,
+    'x_max' : 1
 }
 
 solution_param_2D_PDEPDE_biofilm_dict = {
     'example_name' : 'biofilm_plot_PDEPDE_2D',
 
-    'final_time' : 0.1,
+    'final_time' : 10,
     'dt' : 0.01,
     'gamma': 1/4,
-    'M_par': 1e-2,
+    'M_par': 1e-3,
     'mu': 1,
 
     'stop_crit': 1e-5,
-    'allowed_iter' : 3,
-    'full_iter' : True,
+    'allowed_iter' : 200,
+    'full_iter' : False,
 
     'r' : 0.2,
     'height' : 0.9,
@@ -199,22 +206,22 @@ general_param_2D_PDEPDE_biofilm = general_param(**general_param_2D_PDEPDE_biofil
 geometry_param_2D_PDEODE_biofilm_dict = {
     'dim' : 2,
     'h' : 0.02,
-    'x_min' : -2,
-    'x_max' : 2
+    'x_min' : -1,
+    'x_max' : 1
 }
 
 solution_param_2D_PDEODE_biofilm_dict = {
     'example_name' : 'biofilm_plot_PDEODE_2D',
 
-    'final_time' : 0.1,
+    'final_time' : 10,
     'dt' : 0.01,
     'gamma': 1/4,
-    'M_par': 1e-2,
+    'M_par': 1e-3,
     'mu': 0,
 
     'stop_crit': 1e-5,
-    'allowed_iter' : 3,
-    'full_iter' : True,
+    'allowed_iter' : 200,
+    'full_iter' : False,
 
     'r' : 0.2,
     'height' : 0.9,
