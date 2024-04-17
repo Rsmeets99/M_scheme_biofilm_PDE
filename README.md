@@ -1,17 +1,22 @@
-This repository is a work in progress. Currently in the progress of completely refactoring the old code and making it compatible with the newest stable version of fenicsx. If one wants earlier acces to the code, please contact me for the old legacy code. 
-
-# TODO
-- [ ] Finish the `README.md` files
-
 # General explanation of this repository
+This repository contains all the code used to replicate the results within our paper [Robust time-discretisation and linearisation schemes for singular and degenerate evolution systems modelling biofilm growth](https://arxiv.org/abs/2404.00391). The results within the paper where generated with an older version of the code written during my Master's thesis in FEniCSx v0.5.1, but for this paper the code has been completely rewritten to make it better readable, easier to customize and updated to the most recent version of FEniCSx v0.7.3.
 
 # How to install
-Install miniconda/anaconda, create a new environment with fenicsx. Need to expand on this.
+The easiest way to install in my experience is to install miniconda or anaconda, and use that to install FEniCSx. See also the official FEniCSx download site [link](https://fenicsproject.org/download/). Furthermore, one requires numpy and matplotlib to generate the figures. This means that after installing miniconda/anaconda, one can use the commands
+
+```
+conda create -n fenicsx-env
+conda activate fenicsx-env
+conda install -c conda-forge fenics-dolfinx mpich pyvista numpy matploblib
+```
+
+to create an environment in which the code can be ran.
 
 # How to run
+Explanation on the different .py scripts is given within the README.md files of their respective directories.
 
 # How to view simulations
-Explanation on ParaView and how to view the resuls within ParaView (1D vs 2D)
+The simulation data is stored with VTX in a .bp folder. Note that these can be quite big (on the order of gb for larger simulations), which is the reason I could not upload any premade simulations to GitHub (only accepts files smaller than 100 mb). These .bp files can be viewed within [ParaView](https://www.paraview.org/download/). You want to use the ADIOSVTX2READER to open the data. For 1D one needs the filter `plot data`, while for 2D one needs the filter `scale by scalar` to get a 3D plot. For 2D it might also be necessary to go to the properties of the solution and select coloring and then choose u_n instead of solid color to get the plot. Afterwards, one can then use the scale by scalar filter to make a 3D plot.
 
 # How to cite
 When using the results or code within this repository, we ask you kindly to cite our paper ([link to Arxiv](https://arxiv.org/abs/2404.00391)).

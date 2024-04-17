@@ -152,14 +152,14 @@ if __name__ == '__main__':
                         help= 'If true, plots combined data, overwriting existing plots.')
     parsed_args, unknown = parser.parse_known_args()
 
-    # dt_list = config.experiment_param_1D_avg_iter_pme.dt_list
-    # h_list = config.experiment_param_1D_avg_iter_pme.h_list
-    # M_list = config.experiment_param_1D_avg_iter_pme.M_list
+    dt_list = config.experiment_param_1D_avg_iter_pme.dt_list
+    h_list = config.experiment_param_1D_avg_iter_pme.h_list
+    M_list = config.experiment_param_1D_avg_iter_pme.M_list
 
-    # Smaller parameters for debugging
-    dt_list = [10**(-1*(1+i/2)) for i in range(0,2)]
-    h_list = [1/i for i in range(10,60,10)]
-    M_list = [1e-7, 5e-4]
+    # # Smaller parameters for debugging
+    # dt_list = [10**(-1*(1+i/2)) for i in range(0,2)]
+    # h_list = [1/i for i in range(10,60,10)]
+    # M_list = [1e-7, 5e-4]
 
     geometry_config = config.geometry_param_1D_avg_iter_pme
     solution_config = config.solution_param_1D_avg_iter_pme
