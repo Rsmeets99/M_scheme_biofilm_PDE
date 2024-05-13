@@ -14,6 +14,9 @@ conda install -c conda-forge fenics-dolfinx mpich pyvista numpy matploblib
 
 to create an environment in which the code can be run. Note that if ones uses windows, the installation must be done through the Windows Subsystem for Linux (WSL/WSL2) and install Ubuntu. Alternatively, FEniCSx can be ran through Docker.
 
+
+My preferred way of running the code is through WSL within VSCode (see here how to install [link](https://code.visualstudio.com/docs/remote/wsl)).
+
 # How to run
 Explanation on the different .py scripts is given within the README.md files of their respective directories.
 
