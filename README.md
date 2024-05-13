@@ -4,7 +4,7 @@ This repository contains all the code used to replicate the results within our p
 If one is interested in the older version for FEniCSx v0.5.1 or if one has any other questions or comments, please feel free to send me an e-mail (robinsmeets99@gmail.com).
 
 # How to install
-The easiest way to install the prerequisite packages (in my experience) is to first install miniconda or anaconda, and use that to create an environment that contains the packages. See also the official FEniCSx download site [link](https://fenicsproject.org/download/) (or for more details [link](https://github.com/FEniCS/dolfinx#installation))for a how-to. Furthermore, one requires numpy and matplotlib to generate the figures. This means that after installing miniconda or anaconda, one can use the commands
+The easiest way to install the prerequisite packages (in my experience) is to first install miniconda or anaconda, and use that to create an environment that contains the packages. See also the official FEniCSx download site [link](https://fenicsproject.org/download/) for a how-to (or for more details [link](https://github.com/FEniCS/dolfinx#installation)). Furthermore, one requires numpy and matplotlib to generate the figures. This means that after installing miniconda or anaconda, one can use the commands
 
 ```
 conda create -n fenicsx-env
