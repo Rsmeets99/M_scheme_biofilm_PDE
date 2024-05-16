@@ -9,7 +9,7 @@ The easiest way to install the prerequisite packages (in my experience) is to fi
 ```
 conda create -n fenicsx-env
 conda activate fenicsx-env
-conda install -c conda-forge fenics-dolfinx mpich pyvista numpy matploblib
+conda install -c conda-forge mpich pyvista fenics-dolfinx=0.7.3 numpy=1.26.4 matploblib=3.8.3
 ```
 
 to create an environment in which the code can be run. Note that if ones uses windows, the installation must be done through the Windows Subsystem for Linux (WSL/WSL2) and install Ubuntu. Alternatively, FEniCSx can be ran through Docker.
@@ -18,7 +18,7 @@ to create an environment in which the code can be run. Note that if ones uses wi
 My preferred way of running the code is through WSL within VSCode (see here how to install [link](https://code.visualstudio.com/docs/remote/wsl)).
 
 # How to run
-Explanation on the different .py scripts is given within the README.md files of their respective directories.
+Explanation on the different .py scripts is given within the README.md files of their respective directories ([biofilm](./Code/Biofilm/README.md) and [porous medium equation](./Code/Porous_medium_equation/README.md)).
 
 # How to view simulations
 The simulation data is stored with VTX in a .bp folder. Note that these can be quite big (on the order of gb for larger simulations), which is the reason I could not upload any premade simulations to GitHub (only accepts files smaller than 100 mb). These .bp files can be viewed within [ParaView](https://www.paraview.org/download/). You want to use the ADIOSVTX2READER to open the data. For 1D one needs the filter `plot data`, while for 2D one needs the filter `scale by scalar` to get a 3D plot. For 2D it might also be necessary to go to the properties of the solution and select coloring and then choose u_n instead of solid color to get the plot. Afterwards, one can then use the scale by scalar filter to make a 3D plot.
